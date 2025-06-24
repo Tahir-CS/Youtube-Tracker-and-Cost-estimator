@@ -1,16 +1,16 @@
 // backend.js
-import express from 'express';
-import fetch from 'node-fetch';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
-import cron from 'node-cron';
-import nodemailer from 'nodemailer';
-import { 
-    findOrCreateUser, 
-    addTrackedChannel, 
-    getTrackedChannels, 
+const express = require('express');
+const fetch = require('node-fetch');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const { OAuth2Client } = require('google-auth-library');
+const jwt = require('jsonwebtoken');
+const cron = require('node-cron');
+const nodemailer = require('nodemailer');
+const {
+    findOrCreateUser,
+    addTrackedChannel,
+    getTrackedChannels,
     removeTrackedChannel,
     setAlertCondition,
     getAlertCondition,
@@ -18,7 +18,7 @@ import {
     getChannelSnapshots,
     getAllUsers,
     getAllChannels
-} from './db_mock.js';
+} = require('./db_mock.js');
 
 dotenv.config(); // Load environment variables from .env file
 
