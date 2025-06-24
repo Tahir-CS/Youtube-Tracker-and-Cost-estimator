@@ -418,6 +418,7 @@ app.listen(PORT, '0.0.0.0', () => {
         }
     }
     console.log('Finished scheduled task.');
+  }); // <-- This closes the cron.schedule async function
 });
 
 // Serve index.html for all unknown routes (for SPA routing)
