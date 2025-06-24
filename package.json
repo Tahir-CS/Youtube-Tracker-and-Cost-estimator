@@ -2,7 +2,6 @@
   "name": "web-project",
   "version": "1.0.0",
   "main": "main.js",
-  "type": "module",
   "scripts": {
     "start": "node backend.js",
     "test": "echo \"Error: no test specified\" && exit 1"
