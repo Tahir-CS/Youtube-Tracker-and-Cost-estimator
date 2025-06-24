@@ -24,6 +24,7 @@ dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 app.use(express.json());
+app.use(express.static(process.cwd()));
 
 // --- CORS Setup for OAuth and Frontend ---
 const allowedOrigins = [
@@ -419,6 +420,11 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log('Finished scheduled task.');
 });
 
+// Serve index.html for all unknown routes (for SPA routing)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next(); // Don't interfere with API routes
+  res.sendFile('index.html', { root: process.cwd() });
+});
 
 // Catch-all for unknown API routes (must be after all other routes)
 app.use((req, res) => {
