@@ -29,9 +29,9 @@
     "dashboard"
   ],
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Building for production - No build step required for static site'",
-    "start": "vercel dev",
+    "dev": "python -m http.server 3000 || npx serve .",
+    "build": "echo 'Static site - no build step required'",
+    "start": "python -m http.server 3000 || npx serve .",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
     "lint": "echo 'Add ESLint configuration for linting'",

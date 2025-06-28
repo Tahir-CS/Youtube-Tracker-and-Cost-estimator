@@ -963,3 +963,155 @@ body.dark-mode .prediction-card {
 #signInBtn:hover {
   background: #c4302b;
 }
+
+/* Manual Earnings Calculator Styles */
+#manualCalculatorBtn {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  z-index: 10;
+  padding: 0.5rem 1.2rem;
+  background: #ffd740;
+  color: #222;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+#manualCalculatorBtn:hover {
+  background: #ffb300;
+}
+#manualCalculatorModal .modal-content.calculator-form {
+  max-width: 420px;
+  background: linear-gradient(120deg, #fffbe7 0%, #fff8e1 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 32px #ffb30033;
+  padding: 32px 28px 24px 28px;
+  margin: 0 auto;
+  position: relative;
+  animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+}
+#manualCalculatorModal .close-modal {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 2rem;
+  color: #888;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.calculator-form h2 {
+  text-align: center;
+  color: #c4302b;
+  margin-bottom: 18px;
+}
+.calculator-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+.calculator-row label {
+  font-weight: 600;
+  color: #c4302b;
+  margin-bottom: 4px;
+}
+.calculator-row input,
+.calculator-row select {
+  padding: 10px 12px;
+  border: 1.5px solid #ffd740;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  color: #222;
+  transition: border 0.2s;
+}
+.calculator-row input:focus,
+.calculator-row select:focus {
+  border: 1.5px solid #ffb300;
+  outline: none;
+}
+#calculateEarningsBtn {
+  width: 100%;
+  padding: 12px 0;
+  background: linear-gradient(90deg, #ffd740 0%, #ff5252 100%);
+  color: #222;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#calculateEarningsBtn:hover {
+  background: linear-gradient(90deg, #ffb300 0%, #c4302b 100%);
+  color: #fff;
+}
+.earnings-result {
+  margin-top: 22px;
+  background: linear-gradient(90deg, #fffbe7 0%, #ffd74033 100%);
+  border-radius: 10px;
+  padding: 18px 14px 10px 14px;
+  box-shadow: 0 2px 8px #ffb30022;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+.earnings-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.13rem;
+  font-weight: 600;
+}
+.earnings-label {
+  color: #c4302b;
+  min-width: 160px;
+  display: inline-block;
+}
+.earnings-value {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #388e3c;
+  background: linear-gradient(90deg, #ffd740 0%, #fffbe7 100%);
+  border-radius: 4px;
+  padding: 2px 10px;
+  margin-left: 4px;
+}
+.earnings-value:empty {
+  display: none;
+}
+.earnings-note {
+  font-size: 0.98rem;
+  color: #888;
+  margin-top: 10px;
+  background: none;
+}
+@media (max-width: 600px) {
+  #manualCalculatorModal .modal-content.calculator-form {
+    max-width: 98vw;
+    padding: 18px 6vw 16px 6vw;
+  }
+  .earnings-label { min-width: 110px; }
+}
+body.dark-mode #manualCalculatorModal .modal-content.calculator-form {
+  background: #232323;
+  color: #eee;
+}
+body.dark-mode .calculator-row input,
+body.dark-mode .calculator-row select {
+  background: #181818;
+  color: #eee;
+  border: 1.5px solid #444;
+}
+body.dark-mode .earnings-result {
+  background: linear-gradient(90deg, #232323 0%, #444 100%);
+  color: #eee;
+}
+body.dark-mode .earnings-label { color: #ffd740; }
+body.dark-mode .earnings-value { color: #ffd740; background: #232323; }
+body.dark-mode .earnings-note { color: #bbb; }

@@ -20,6 +20,7 @@ import { analyzeChannelTrendsWithAI } from './ai.js';
 
 // Expose global functions for HTML event handlers (needed for remove compare button)
 window.removeComparedChannel = removeComparedChannel;
+window.handleCredentialResponse = handleCredentialResponse;
 
 // --- Video Pagination State ---
 let allFetchedVideos = [];
@@ -289,7 +290,7 @@ document.getElementById('addToCompareBtn').onclick = async function(e) {
   } else {
     const status = document.getElementById('statusMessage');
     status.textContent = 'Searching for channels...';
-    const searchUrl = `http://localhost:3001/api/youtube?endpoint=search&part=snippet&type=channel&q=${encodeURIComponent(input)}&maxResults=10`;
+    const searchUrl = `http://localhost:3000/api/youtube?endpoint=search&part=snippet&type=channel&q=${encodeURIComponent(input)}&maxResults=10`;
     const res = await fetch(searchUrl);
     const data = await res.json();
     if (!data.items || data.items.length === 0) {
@@ -297,7 +298,7 @@ document.getElementById('addToCompareBtn').onclick = async function(e) {
       return;
     }
     const channelIds = data.items.map(item => item.snippet.channelId).join(',');
-    const statsUrl = `http://localhost:3001/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelIds}`;
+    const statsUrl = `http://localhost:3000/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelIds}`;
     const statsRes = await fetch(statsUrl);
     const statsData = await statsRes.json();
     const sorted = statsData.items.sort((a, b) => parseInt(b.statistics.subscriberCount||0) - parseInt(a.statistics.subscriberCount||0));
@@ -665,7 +666,7 @@ async function searchAndSelectChannel(input, isSearchContextForDashboard = false
     status.textContent = 'Searching for channels...';
     // Remove redeclaration of searchUrl, res, data, channelIds, statsUrl, statsRes, statsData, sorted, channelInfoContainer, status
     // Only declare them once at the top of the function, and reuse for both code paths
-    const searchUrl = `http://localhost:3001/api/youtube?endpoint=search&part=snippet&type=channel&q=${encodeURIComponent(input)}&maxResults=10`;
+    const searchUrl = `http://localhost:3000/api/youtube?endpoint=search&part=snippet&type=channel&q=${encodeURIComponent(input)}&maxResults=10`;
     const res = await fetch(searchUrl);
     const data = await res.json();
     if (!data.items || data.items.length === 0) {
@@ -673,7 +674,7 @@ async function searchAndSelectChannel(input, isSearchContextForDashboard = false
         return;
     }
     const channelIds = data.items.map(item => item.snippet.channelId).join(',');
-    const statsUrl = `http://localhost:3001/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelIds}`;
+    const statsUrl = `http://localhost:3000/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelIds}`;
     const statsRes = await fetch(statsUrl);
     const statsData = await statsRes.json();
     const sorted = statsData.items.sort((a, b) => parseInt(b.statistics.subscriberCount||0) - parseInt(a.statistics.subscriberCount||0));
@@ -827,5 +828,68 @@ window.onpopstate = function(event) {
     document.getElementById('statusMessage').textContent = '';
     document.getElementById('channelInput').value = '';
     document.getElementById('channelInput').focus();
+  }
+};
+
+// Manual Earnings Calculator Modal Logic
+const manualCalculatorBtn = document.getElementById('manualCalculatorBtn');
+const manualCalculatorModal = document.getElementById('manualCalculatorModal');
+const closeCalculatorModal = document.getElementById('closeCalculatorModal');
+const calculateEarningsBtn = document.getElementById('calculateEarningsBtn');
+const calculatorResults = document.getElementById('calculatorResults');
+
+if (manualCalculatorBtn && manualCalculatorModal) {
+  manualCalculatorBtn.addEventListener('click', () => {
+    manualCalculatorModal.style.display = 'block';
+    calculatorResults.style.display = 'none';
+    document.getElementById('earningsCalcForm').reset();
+  });
+}
+if (closeCalculatorModal) {
+  closeCalculatorModal.addEventListener('click', () => {
+    manualCalculatorModal.style.display = 'none';
+  });
+}
+window.addEventListener('click', (e) => {
+  if (e.target === manualCalculatorModal) {
+    manualCalculatorModal.style.display = 'none';
+  }
+});
+
+if (calculateEarningsBtn) {
+  calculateEarningsBtn.addEventListener('click', () => {
+    const views = parseInt(document.getElementById('calcViews').value) || 0;
+    const country = document.getElementById('calcCountry').value;
+    const customCPM = parseFloat(document.getElementById('calcCPM').value);
+    const cpm = CPM_TABLE[country] || CPM_TABLE['Unknown'];
+    const minCPM = cpm.CPM_min;
+    const maxCPM = cpm.CPM_max;
+    const revenueShare = 0.55;
+    // Conservative
+    const conservative = ((views / 1000) * minCPM * revenueShare) || 0;
+    // Optimistic
+    const optimistic = ((views / 1000) * maxCPM * revenueShare) || 0;
+    // Custom
+    let custom = 0;
+    if (!isNaN(customCPM) && customCPM > 0) {
+      custom = ((views / 1000) * customCPM * revenueShare);
+    }
+    document.getElementById('conservativeEarnings').textContent = `$${conservative.toLocaleString(undefined, {maximumFractionDigits:2})}`;
+    document.getElementById('optimisticEarnings').textContent = `$${optimistic.toLocaleString(undefined, {maximumFractionDigits:2})}`;
+    document.getElementById('customEarnings').textContent = custom > 0 ? `$${custom.toLocaleString(undefined, {maximumFractionDigits:2})}` : 'N/A';
+    calculatorResults.style.display = 'block';
+  });
+}
+
+// Demo mode for static server - replace API calls with mock data
+const DEMO_MODE = false; // Set to false when backend is available
+
+// Mock data for demonstration
+const MOCK_CHANNEL_DATA = {
+  "MrBeast": {
+    id: "UCX6OQ3DkcsbYNE6H8uQQuVA",
+    title: "MrBeast",
+    thumbnails: { default: { url: "https://yt3.ggpht.com/ytc/AIdro_kGrj-w8sKB_1eXXeYMJlpj2m1R5qOOj8hq6w=s88-c-k-c0x00ffffff-no-rj" }},
+    statistics: { subscriberCount: "234000000", viewCount: "51234567890", videoCount: "819" }
   }
 };

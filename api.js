@@ -3,7 +3,7 @@ import { extractChannelId } from './utils.js';
 
 // Detect if running locally or on Vercel
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://localhost:3001' 
+    ? 'http://localhost:3000' 
     : window.location.origin; // Use same origin for Vercel deployment
 
 // --- Authentication ---
@@ -322,7 +322,7 @@ export async function fetchAndDisplayGlobalTrends() {
   `;
 
   try {
-    const res = await fetchWithTimeout('http://localhost:3001/api/youtube/global-trends', { timeout: 15000 });
+    const res = await fetchWithTimeout('http://localhost:3000/api/youtube/global-trends', { timeout: 15000 });
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);

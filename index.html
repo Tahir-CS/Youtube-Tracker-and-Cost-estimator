@@ -22,6 +22,7 @@
         <button id="logoutButton">Logout</button>
       </div>
     </div>
+    <button id="manualCalculatorBtn" style="position:absolute;top:18px;left:24px;z-index:10;padding:0.5rem 1.2rem;background:#ffd740;color:#222;border:none;border-radius:4px;cursor:pointer;font-weight:600;">💰 Earnings Calculator</button>
   </header>
 
   <!-- Dark Mode Toggle and Sign In Button -->
@@ -41,6 +42,47 @@
         <li>🌙 <b>Switch</b> between light and dark mode</li>
       </ul>
       <button id="closeOnboardingBtn" class="show-more-btn">Get Started</button>
+    </div>
+  </div>
+
+  <!-- Manual Earnings Calculator Modal -->
+  <div id="manualCalculatorModal" class="modal" style="display:none;">
+    <div class="modal-content calculator-form">
+      <span class="close-modal" id="closeCalculatorModal">&times;</span>
+      <h2>Manual YouTube Earnings Calculator</h2>
+      <form id="earningsCalcForm">
+        <div class="calculator-row">
+          <label for="calcViews">Monthly Views</label>
+          <input type="number" id="calcViews" min="0" placeholder="e.g. 100000" required>
+        </div>
+        <div class="calculator-row">
+          <label for="calcCountry">Country</label>
+          <select id="calcCountry" required>
+            <option value="United States">United States ($4 - $10 CPM)</option>
+            <option value="Canada">Canada ($3 - $7 CPM)</option>
+            <option value="United Kingdom">UK ($3 - $7 CPM)</option>
+            <option value="Australia">Australia ($3 - $8 CPM)</option>
+            <option value="Germany">Germany ($2.5 - $6 CPM)</option>
+            <option value="France">France ($2 - $5 CPM)</option>
+            <option value="India">India ($0.25 - $1 CPM)</option>
+            <option value="Pakistan">Pakistan ($0.2 - $0.8 CPM)</option>
+            <option value="Brazil">Brazil ($0.5 - $1.5 CPM)</option>
+            <option value="Russia">Russia ($0.5 - $1.5 CPM)</option>
+            <option value="Unknown">Other / Mixed ($1 - $3 CPM)</option>
+          </select>
+        </div>
+        <div class="calculator-row">
+          <label for="calcCPM">Custom CPM ($)</label>
+          <input type="number" id="calcCPM" min="0" step="0.01" placeholder="(optional)">
+        </div>
+        <button type="button" id="calculateEarningsBtn">Calculate</button>
+      </form>
+      <div id="calculatorResults" class="earnings-result" style="display:none;">
+        <div class="earnings-item"><span class="earnings-label">Conservative Estimate:</span> <span id="conservativeEarnings" class="earnings-value"></span></div>
+        <div class="earnings-item"><span class="earnings-label">Optimistic Estimate:</span> <span id="optimisticEarnings" class="earnings-value"></span></div>
+        <div class="earnings-item"><span class="earnings-label">Custom CPM Estimate:</span> <span id="customEarnings" class="earnings-value"></span></div>
+        <div class="earnings-note">Note: YouTube typically pays creators 55% of ad revenue. Actual earnings depend on many factors.</div>
+      </div>
     </div>
   </div>
 
