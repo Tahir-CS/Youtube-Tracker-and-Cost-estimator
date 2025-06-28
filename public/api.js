@@ -179,7 +179,18 @@ export async function callGeminiAPI(data, sessionToken) {
   });
 
   if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    const errorText = await response.text().catch(() => '');
+    let errorMessage = `Gemini AI analysis failed (${response.status})`;
+    
+    if (response.status === 429 || errorText.toLowerCase().includes('quota')) {
+      errorMessage = 'Gemini AI quota exceeded. Please try again tomorrow.';
+    } else if (response.status === 403) {
+      errorMessage = 'Gemini AI access denied. Please check API key configuration.';
+    } else if (response.status >= 500) {
+      errorMessage = 'Gemini AI service temporarily unavailable. Please try again later.';
+    }
+    
+    throw new Error(errorMessage);
   }
 
   const result = await response.json();
@@ -348,26 +359,56 @@ export async function fetchAndDisplayGlobalTrends() {
     }
 
   } catch (err) {
+    console.error('Global trends error:', err);
     let errorMessage = 'Could not load global trends. The service may be temporarily unavailable.';
+    let showRetryButton = true;
+    
+    // Handle specific error cases
     if (err.name === 'AbortError') {
       errorMessage = 'Loading global trends timed out. Please try again later.';
+    } else if (err.message.includes('429') || err.message.toLowerCase().includes('quota')) {
+      errorMessage = '⚠️ Gemini AI API quota exceeded. Global trends are temporarily unavailable. Please try again tomorrow.';
+      showRetryButton = false;
+    } else if (err.message.includes('403') || err.message.toLowerCase().includes('forbidden')) {
+      errorMessage = '🔒 API access denied. Please check your Gemini AI API key configuration.';
+      showRetryButton = false;
+    } else if (err.message.includes('500') || err.message.includes('502') || err.message.includes('503')) {
+      errorMessage = '🔧 Server error occurred. The AI service may be temporarily down. Please try again later.';
+    } else if (!navigator.onLine) {
+      errorMessage = '📶 No internet connection. Please check your network and try again.';
     }
+    
     trendsSection.innerHTML = `
       <div class="global-trends-card animated-fadein">
         <h2 class="global-trends-title">🔥 YouTube Global Trends</h2>
-        <div class="error-message">${errorMessage}</div>
+        <div class="error-message" style="background: rgba(255,193,7,0.1); border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin: 10px 0; color: #856404;">${errorMessage}</div>
         <div style="text-align:center; margin-top: 12px;">
-            <button id="showPreviousTrendsBtn" class="btn btn-primary">Show Previous Trends</button>
+            <button id="showPreviousTrendsBtn" class="btn btn-primary">📊 Show Previous Trends</button>
+            ${showRetryButton ? `<button id="retryTrendsBtn" class="btn btn-secondary" style="margin-left: 10px;">🔄 Retry</button>` : ''}
         </div>
       </div>
     `;
+    
     const showPreviousBtn = document.getElementById('showPreviousTrendsBtn');
     if(showPreviousBtn) {
         showPreviousBtn.onclick = () => {
             renderTrendsData(fallbackTrends, trendsSection, true);
         };
     }
-    addRefreshButton(trendsSection);
+    
+    const retryBtn = document.getElementById('retryTrendsBtn');
+    if(retryBtn) {
+        retryBtn.onclick = async () => {
+            retryBtn.textContent = '⏳ Retrying...';
+            retryBtn.disabled = true;
+            trendsSection.removeAttribute('data-loaded');
+            await fetchAndDisplayGlobalTrends();
+        };
+    }
+    
+    if (!showRetryButton) {
+        addRefreshButton(trendsSection);
+    }
   } finally {
     trendsSection.setAttribute('data-loaded', '1');
     trendsSection.removeAttribute('data-reloading');

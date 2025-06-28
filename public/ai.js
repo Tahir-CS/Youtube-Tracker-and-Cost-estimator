@@ -47,40 +47,73 @@ async function performRealAIAnalysis(videos, channelData) {
     if (!aiInsights) throw new Error('No AI insights returned');
     displayAIAnalysis(aiInsights);
   } catch (error) {
-    // Fallback: Show cached/previous analysis if Gemini fails
-    const fallbackInsights = {
-      trendingTopics: [
-        'Short-form content (YouTube Shorts)',
-        'AI tools and tech explainers',
-        'Personal finance and side hustles'
-      ],
-      strategyRecommendations: [
-        'Leverage Shorts for discoverability',
-        'Create practical AI/tech tutorials',
-        'Share real-life financial success stories'
-      ],
-      postingInsights: [
-        'Post consistently, especially on weekends',
-        'Use trending hashtags and titles',
-        'Engage with comments quickly after upload'
-      ],
-      engagementTips: [
-        'Ask viewers questions in your videos',
-        'Pin top comments to spark discussion',
-        'Collaborate with other creators in your niche'
-      ],
-      futurePredictions: [
-        'Increased focus on AI-generated content',
-        'More interactive and community-driven videos',
-        'Growth in educational and self-improvement topics'
-      ]
-    };
-    displayAIAnalysis(fallbackInsights);
-    document.getElementById('trendsContent').innerHTML += `
-      <div class="error-message">
-        <small>⚠️ Showing previous analysis due to AI error: ${error.message}</small>
-      </div>
-    `;
+    console.error('AI Analysis error:', error);
+    
+    // Determine error type and provide appropriate feedback
+    let errorMessage = error.message || 'AI analysis failed';
+    let showFallback = true;
+    
+    if (errorMessage.toLowerCase().includes('quota')) {
+      errorMessage = '⚠️ Gemini AI quota exceeded. Showing previous analysis.';
+      showFallback = true;
+    } else if (errorMessage.toLowerCase().includes('access denied') || errorMessage.includes('403')) {
+      errorMessage = '🔒 AI access denied. Please check API configuration.';
+      showFallback = true;
+    } else if (errorMessage.includes('500') || errorMessage.includes('503')) {
+      errorMessage = '🔧 AI service temporarily unavailable. Showing cached analysis.';
+      showFallback = true;
+    }
+    
+    if (showFallback) {
+      // Fallback: Show cached/previous analysis if Gemini fails
+      const fallbackInsights = {
+        trendingTopics: [
+          'Short-form content (YouTube Shorts)',
+          'AI tools and tech explainers',
+          'Personal finance and side hustles'
+        ],
+        strategyRecommendations: [
+          'Leverage Shorts for discoverability',
+          'Create practical AI/tech tutorials',
+          'Share real-life financial success stories'
+        ],
+        postingInsights: [
+          'Post consistently, especially on weekends',
+          'Use trending hashtags and titles',
+          'Engage with comments quickly after upload'
+        ],
+        engagementTips: [
+          'Ask viewers questions in your videos',
+          'Pin top comments to spark discussion',
+          'Collaborate with other creators in your niche'
+        ],
+        futurePredictions: [
+          'Increased focus on AI-generated content',
+          'More interactive and community-driven videos',
+          'Growth in educational and self-improvement topics'
+        ]
+      };
+      displayAIAnalysis(fallbackInsights);
+      
+      // Show error message with better styling
+      const trendsContent = document.getElementById('trendsContent');
+      if (trendsContent) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'ai-error-message';
+        errorDiv.style.cssText = 'background: rgba(255,193,7,0.1); border: 1px solid #ffc107; border-radius: 8px; padding: 10px; margin: 15px 0; color: #856404; text-align: center;';
+        errorDiv.innerHTML = `<small>${errorMessage}</small>`;
+        trendsContent.appendChild(errorDiv);
+      }
+    } else {
+      // Show error without fallback
+      document.getElementById('trendsContent').innerHTML = `
+        <div class="error-message" style="background: rgba(220,53,69,0.1); border: 1px solid #dc3545; border-radius: 8px; padding: 15px; margin: 10px 0; color: #721c24; text-align: center;">
+          <p><strong>🤖 AI Analysis Unavailable</strong></p>
+          <p>${errorMessage}</p>
+          <button onclick="location.reload()" class="btn btn-secondary" style="margin-top: 10px;">🔄 Refresh Page</button>
+        </div>
+      `;
+    }
   }
 }
 
