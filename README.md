@@ -1,111 +1,96 @@
-# YouTube Tracker
+# 📊 YouTube Tracker Cost Estimator
 
-## Overview
-YouTube Tracker is a web application designed to help users track YouTube channel statistics, set alerts for milestones, and analyze global trends using AI. The app integrates Google Sign-In for authentication and uses the YouTube Data API and Gemini AI for data processing.
+A YouTube channel analytics platform with AI-powered insights and earnings estimation.
 
-## Features
-- **Google Sign-In**: Secure authentication using Google accounts.
-- **Channel Tracking**: Add, remove, and view tracked YouTube channels.
-- **Alerts**: Set milestone or growth percentage alerts for tracked channels.
-- **Global Trends Analysis**: Analyze trending YouTube videos using AI.
-- **Email Notifications**: Receive alerts via email.
 
-## Folder Structure
-```
-YOUTUBE TRACKER/
-├── ai.js
-├── api.js
-├── backend.js
-├── charts.js
-├── city_coordinates.csv
-├── compare.js
-├── db_mock.js
-├── google-signin-custom.css
-├── index.html
-├── main.js
-├── master.css
-├── package.json
-├── railway.json
-├── ui.js
-├── utils.js
-├── .env
-├── .gitignore
-├── README.md
-```
+## ✨ Features
 
-## Setup
+- **Real-time Analytics**: Track subscriber counts, views, and channel growth
+- **AI Insights**: Gemini AI-powered trend analysis and predictions
+- **Earnings Calculator**: Estimate revenue based on CPM and view metrics
+- **Smart Alerts**: Milestone notifications and growth tracking
+- **Channel Comparison**: Side-by-side analytics for multiple channels
+- **Google OAuth**: Secure authentication with Google accounts
 
-### Prerequisites
-- Node.js and npm installed
-- Railway CLI (optional, for deployment)
+## � Quick Start
 
-### Installation
-1. Clone the repository:
+1. **Clone and Install**
    ```bash
-   git clone <repository-url>
-   cd YOUTUBE TRACKER
-   ```
-2. Install dependencies:
-   ```bash
+   git clone https://github.com/yourusername/youtube-tracker-cost-estimator.git
+   cd youtube-tracker-cost-estimator
    npm install
    ```
 
-### Environment Variables
-Create a `.env` file in the root directory with the following variables:
+2. **Environment Setup**
+   
+   # Edit .env.local with your API keys
+   ```
+
+3. **Required API Keys**
+   - YouTube Data API v3 (Google Cloud Console)
+   - Google OAuth Client ID (Google Cloud Console)
+   - Gemini AI API (Google AI Studio)
+   - Supabase URL and Keys (Supabase Dashboard)
+
+4. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+
+## 📁 Project Structure
+
 ```
-GOOGLE_CLIENT_ID=<your-google-client-id>
-JWT_SECRET=<your-jwt-secret>
-GEMINI_API_KEY=<your-gemini-api-key>
-YOUTUBE_API_KEY=<your-youtube-api-key>
-EMAIL_HOST=<your-email-host>
-EMAIL_PORT=<your-email-port>
-EMAIL_USER=<your-email-username>
-EMAIL_PASS=<your-email-password>
-RAILWAY_STATIC_URL=<your-railway-static-url>
-PORT=<your-port>
+├── index.html          # Main interface
+├── main.js             # App entry point
+├── api.js              # API communication
+├── ui.js               # UI components
+├── charts.js           # Data visualization
+├── ai.js               # AI integration
+├── api/                # Backend endpoints
+│   ├── youtube.js      # YouTube API
+│   ├── auth/google.js  # Google OAuth
+│   └── ai/analyze.js   # AI analysis
+└── lib/supabase.js     # Database client
 ```
 
-### Running Locally
-Start the server:
+## � Configuration
+
+### Database Setup
+Run the SQL schema from `supabase-schema.sql` in your Supabase project.
+
+### API Configuration
+1. **YouTube API**: Enable YouTube Data API v3 in Google Cloud Console
+2. **Google OAuth**: Create OAuth 2.0 credentials with your domain
+3. **Gemini AI**: Get API key from Google AI Studio
+4. **Supabase**: Create project and get URL/keys from dashboard
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
 ```bash
-npm start
+npm i -g vercel
+vercel --prod
 ```
-Access the app at `http://localhost:3001`.
+Add environment variables in Vercel dashboard.
 
-## Deployment
 
-### Railway Deployment
-1. Install Railway CLI:
-   ```bash
-   npm install -g railway
-   ```
-2. Link the project:
-   ```bash
-   railway link
-   ```
-3. Set environment variables using the Railway dashboard.
-4. Deploy the app:
-   ```bash
-   railway up
-   ```
+## �️ Usage
 
-## Usage
-- Sign in using your Google account.
-- Add YouTube channels to track their statistics.
-- Set alerts for milestones or growth percentages.
-- View global trends analyzed by AI.
+1. **Sign in** with Google account
+2. **Add channels** by URL or handle
+3. **Set alerts** for milestones
+4. **Compare channels** side-by-side
+5. **View AI insights** and predictions
 
-## Contributing
-Feel free to submit issues or pull requests to improve the app.
+## 🤝 Contributing
 
-## License
-This project is licensed under the MIT License.
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
-## Ignored Files
 
-The following files and folders are ignored in version control:
 
-```
-node_modules/  # Installed dependencies
-.env           # Local environment variables
-```
+---
+**Built with ❤️ using Supabase, Vercel, and Google AI**

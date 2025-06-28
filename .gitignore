@@ -1,15 +1,15 @@
-# Node modules
+# Environment files
+.env*
+
+# Dependencies
 node_modules/
 
-# Environment variables
-.env
+# Build outputs
+dist/
+build/
 
 # Logs
-logs/
 *.log
-
-# Railway deployment files
-railway.json
 
 # IDE files
 .vscode/

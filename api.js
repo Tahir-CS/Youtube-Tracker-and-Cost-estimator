@@ -1,11 +1,14 @@
 // api.js - Handles all API calls (YouTube Data API, Gemini AI, and App Backend)
 import { extractChannelId } from './utils.js';
 
-const API_BASE_URL = 'http://localhost:3001'; // Your backend URL
+// Detect if running locally or on Vercel
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3001' 
+    : window.location.origin; // Use same origin for Vercel deployment
 
 // --- Authentication ---
 export async function sendGoogleTokenToBackend(googleIdToken) {
-    const response = await fetch(`${API_BASE_URL}/auth/google/callback`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -47,18 +50,21 @@ export async function addTrackedChannel(sessionToken, channelId, channelName) {
 }
 
 export async function removeTrackedChannel(sessionToken, channelId) {
-    const response = await fetch(`${API_BASE_URL}/api/tracked-channels/${channelId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tracked-channels?channelId=${channelId}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
         },
     });
-    if (!response.ok) throw new Error('Failed to remove channel');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to remove channel' }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+    }
     return response.json();
 }
 
 export async function setChannelAlert(sessionToken, channelId, alertConfig) { // alertConfig = { type, threshold }
-    const response = await fetch(`${API_BASE_URL}/api/tracked-channels/${channelId}/alerts`, {
+    const response = await fetch(`${API_BASE_URL}/api/alerts?channelId=${channelId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -66,27 +72,27 @@ export async function setChannelAlert(sessionToken, channelId, alertConfig) { //
         },
         body: JSON.stringify(alertConfig),
     });
-    if (!response.ok) throw new Error('Failed to set alert');
-    return response.json();
-}
-
-export async function getChannelAlert(sessionToken, channelId) {
-    const response = await fetch(`${API_BASE_URL}/api/tracked-channels/${channelId}/alerts`, {
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-        },
-    });
     if (!response.ok) {
-        if (response.status === 404) return null; // No alert set is not an error
-        throw new Error('Failed to get alert');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to set alert' }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
     }
     return response.json();
 }
 
-export async function getChannelSnapshots(sessionToken, channelId) {
-    const response = await fetch(`${API_BASE_URL}/api/tracked-channels/${channelId}/snapshots`, {
+export async function getChannelAlert(sessionToken, channelId) {
+    const response = await fetch(`${API_BASE_URL}/api/alerts?channelId=${channelId}`, {
         headers: {
-            'Authorization': `Bearer ${sessionToken}`, // May not be strictly needed if snapshots are public once tracked
+            'Authorization': `Bearer ${sessionToken}`,
+        },
+    });
+    if (!response.ok) throw new Error('Failed to fetch alert condition');
+    return response.json();
+}
+
+export async function getChannelSnapshots(sessionToken, channelId) {
+    const response = await fetch(`${API_BASE_URL}/api/snapshots?channelId=${channelId}`, {
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
         },
     });
     if (!response.ok) throw new Error('Failed to fetch channel snapshots');
@@ -94,16 +100,20 @@ export async function getChannelSnapshots(sessionToken, channelId) {
 }
 
 // --- YouTube Data API Calls ---
-export async function resolveToChannelId(input) {
+export async function resolveToChannelId(input, sessionToken) {
   if (input.startsWith('UC')) return input;
-  const urlUser = `http://localhost:3001/api/youtube?endpoint=channels&part=id&forUsername=${input}`;
-  const resUser = await fetch(urlUser);
+  const urlUser = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=${input}`)}`;
+  const resUser = await fetch(urlUser, {
+    headers: { 'Authorization': `Bearer ${sessionToken}` }
+  });
   const dataUser = await resUser.json();
   if (dataUser.items && dataUser.items.length > 0) {
     return dataUser.items[0].id;
   }
-  const urlCustom = `http://localhost:3001/api/youtube?endpoint=search&part=snippet&type=channel&q=${input}`;
-  const resCustom = await fetch(urlCustom);
+  const urlCustom = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${input}`)}`;
+  const resCustom = await fetch(urlCustom, {
+    headers: { 'Authorization': `Bearer ${sessionToken}` }
+  });
   const dataCustom = await resCustom.json();
   if (dataCustom.items && dataCustom.items.length > 0) {
     return dataCustom.items[0].snippet.channelId;
@@ -111,9 +121,11 @@ export async function resolveToChannelId(input) {
   throw new Error('Channel not found');
 }
 
-export async function fetchChannelData(channelId) {
-  const url = `http://localhost:3001/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelId}`;
-  const response = await fetch(url);
+export async function fetchChannelData(channelId, sessionToken) {
+  const url = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}`)}`;
+  const response = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${sessionToken}` }
+  });
   const data = await response.json();
   if (data.items && data.items.length > 0) {
     return data.items[0];
@@ -122,12 +134,14 @@ export async function fetchChannelData(channelId) {
   }
 }
 
-export async function fetchRecentVideos(channelId) {
+export async function fetchRecentVideos(channelId, sessionToken) {
   let allVideos = [];
   let nextPageToken = '';
   do {
-    const searchUrl = `http://localhost:3001/api/youtube?endpoint=search&key=none&channelId=${channelId}&part=snippet&order=date&maxResults=50&type=video${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
-    const searchResponse = await fetch(searchUrl);
+    const searchUrl = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/search?channelId=${channelId}&part=snippet&order=date&maxResults=50&type=video${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`)}`;
+    const searchResponse = await fetch(searchUrl, {
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    });
     const searchData = await searchResponse.json();
     if (searchData.items && searchData.items.length > 0) {
       allVideos = allVideos.concat(searchData.items);
@@ -139,8 +153,10 @@ export async function fetchRecentVideos(channelId) {
   let allStats = [];
   for (let i = 0; i < allVideoIds.length; i += 50) {
     const batchIds = allVideoIds.slice(i, i + 50).join(',');
-    const statsUrl = `http://localhost:3001/api/youtube?endpoint=videos&part=statistics,snippet&id=${batchIds}`;
-    const statsResponse = await fetch(statsUrl);
+    const statsUrl = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${batchIds}`)}`;
+    const statsResponse = await fetch(statsUrl, {
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    });
     const statsData = await statsResponse.json();
     if (statsData.items && statsData.items.length > 0) {
       allStats = allStats.concat(statsData.items);
@@ -150,25 +166,16 @@ export async function fetchRecentVideos(channelId) {
   return allStats;
 }
 
-export async function callGeminiAPI(data) {
+export async function callGeminiAPI(data, sessionToken) {
   const prompt = `\nYou are a YouTube analytics expert. Analyze this channel data and provide actionable insights:\n\nCHANNEL: ${data.channelName}\nDESCRIPTION: ${data.channelDescription}\nSUBSCRIBERS: ${data.totalSubscribers.toLocaleString()}\nTOTAL VIEWS: ${data.totalViews.toLocaleString()}\nTOTAL VIDEOS: ${data.totalVideos.toLocaleString()}\n\nRECENT VIDEOS:\n${data.recentVideos.map((v, i) => `\n${i+1}. \"${v.title}\"\n   Views: ${v.views.toLocaleString()} | Likes: ${v.likes.toLocaleString()} | Comments: ${v.comments.toLocaleString()}\n   Published: ${new Date(v.publishedAt).toLocaleDateString()}\n`).join('')}\n\nPlease provide:\n1. TOP TRENDING TOPICS (what content themes are performing best)\n2. CONTENT STRATEGY RECOMMENDATIONS (specific actionable advice)\n3. OPTIMAL POSTING INSIGHTS (best practices for this channel)\n4. ENGAGEMENT OPTIMIZATION TIPS (how to improve likes/comments)\n5. TRENDING PREDICTIONS (what content might work well in the future)\n\nFormat as JSON with these exact keys: trendingTopics, strategyRecommendations, postingInsights, engagementTips, futurePredictions\nEach should be an array of strings with specific, actionable advice.\n`;
 
-  const response = await fetch('http://localhost:3001/api/gemini', {
+  const response = await fetch(`${API_BASE_URL}/api/ai/analyze`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${sessionToken}`,
     },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{ text: prompt }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      }
-    })
+    body: JSON.stringify({ prompt }),
   });
 
   if (!response.ok) {

@@ -1,29 +1,63 @@
 {
-  "name": "web-project",
+  "name": "youtube-tracker-cost-estimator",
   "version": "1.0.0",
-  "main": "main.js",
-  "scripts": {
-    "start": "node backend.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
+  "type": "module",
+  "main": "index.html",
+  "description": "A comprehensive YouTube channel analytics platform with AI-powered insights, real-time tracking, and earnings estimation. Built with Supabase backend and deployed on Vercel.",
+  "author": "Your Name <your.email@domain.com>",
   "license": "ISC",
-  "description": "",
+  "homepage": "https://github.com/yourusername/youtube-tracker-cost-estimator#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/youtube-tracker-cost-estimator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/youtube-tracker-cost-estimator/issues"
+  },
+  "keywords": [
+    "youtube",
+    "analytics",
+    "tracker",
+    "vercel",
+    "serverless",
+    "supabase",
+    "ai",
+    "gemini",
+    "cost-estimator",
+    "earnings",
+    "social-media",
+    "dashboard"
+  ],
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Building for production - No build step required for static site'",
+    "start": "vercel dev",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "lint": "echo 'Add ESLint configuration for linting'",
+    "test": "echo 'Add test framework for testing'",
+    "format": "echo 'Add Prettier for code formatting'",
+    "clean": "rm -rf .vercel dist build",
+    "setup": "cp .env.example .env.local && echo 'Please configure your environment variables in .env.local'"
+  },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "@supabase/supabase-js": "^2.39.3",
     "google-auth-library": "^10.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.1",
-    "node-cron": "^4.1.0",
-    "node-fetch": "^3.3.2",
-    "nodemailer": "^7.0.3"
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "vercel": "^37.6.0"
   },
   "engines": {
-    "node": "18.x"
-  }
+    "node": ">=18.x",
+    "npm": ">=8.x"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }
 
 
