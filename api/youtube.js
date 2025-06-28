@@ -5,19 +5,25 @@ import jwt from 'jsonwebtoken';
 function verifyToken(req) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new Error('No token provided');
+        return null; // Return null instead of throwing error for optional auth
     }
 
     const token = authHeader.substring(7);
-    return jwt.verify(token, process.env.JWT_SECRET);
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        return null; // Return null for invalid tokens
+    }
 }
 
 export default async function handler(req, res) {
     // Enable CORS
     const allowedOrigins = [
-        'https://your-frontend-domain.vercel.app', // Replace with your actual domain
+        'https://youtube-tracker-cost-estimator-supa-base-version-infp6oj7i.vercel.app',
+        'http://localhost:3000',
         'http://localhost:5500',
-        'http://127.0.0.1:5500'
+        'http://127.0.0.1:5500',
+        'http://127.0.0.1:3000'
     ];
 
     const origin = req.headers.origin;
@@ -38,7 +44,8 @@ export default async function handler(req, res) {
     }
 
     try {
-        verifyToken(req); // Verify user is authenticated
+        const user = verifyToken(req); // Optional authentication
+        // Note: user will be null if not authenticated, but that's OK for public YouTube searches
 
         const { url } = req.query;
         if (!url) {

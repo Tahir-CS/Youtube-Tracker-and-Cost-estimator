@@ -290,16 +290,23 @@ document.getElementById('addToCompareBtn').onclick = async function(e) {
   } else {
     const status = document.getElementById('statusMessage');
     status.textContent = 'Searching for channels...';
-    const searchUrl = `http://localhost:3000/api/youtube?endpoint=search&part=snippet&type=channel&q=${encodeURIComponent(input)}&maxResults=10`;
-    const res = await fetch(searchUrl);
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+    const searchUrl = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${input}&maxResults=10`)}`;
+    const res = await fetch(searchUrl, {
+        headers: currentSessionToken ? { 'Authorization': `Bearer ${currentSessionToken}` } : {}
+    });
     const data = await res.json();
     if (!data.items || data.items.length === 0) {
       status.textContent = 'No channels found with that name.';
       return;
     }
     const channelIds = data.items.map(item => item.snippet.channelId).join(',');
-    const statsUrl = `http://localhost:3000/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelIds}`;
-    const statsRes = await fetch(statsUrl);
+    const statsUrl = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelIds}`)}`;
+    const statsRes = await fetch(statsUrl, {
+        headers: currentSessionToken ? { 'Authorization': `Bearer ${currentSessionToken}` } : {}
+    });
     const statsData = await statsRes.json();
     const sorted = statsData.items.sort((a, b) => parseInt(b.statistics.subscriberCount||0) - parseInt(a.statistics.subscriberCount||0));
     const channelInfo = document.getElementById('channelInfo');
@@ -666,16 +673,23 @@ async function searchAndSelectChannel(input, isSearchContextForDashboard = false
     status.textContent = 'Searching for channels...';
     // Remove redeclaration of searchUrl, res, data, channelIds, statsUrl, statsRes, statsData, sorted, channelInfoContainer, status
     // Only declare them once at the top of the function, and reuse for both code paths
-    const searchUrl = `http://localhost:3000/api/youtube?endpoint=search&part=snippet&type=channel&q=${encodeURIComponent(input)}&maxResults=10`;
-    const res = await fetch(searchUrl);
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+    const searchUrl = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${input}&maxResults=10`)}`;
+    const res = await fetch(searchUrl, {
+        headers: currentSessionToken ? { 'Authorization': `Bearer ${currentSessionToken}` } : {}
+    });
     const data = await res.json();
     if (!data.items || data.items.length === 0) {
         status.textContent = 'No channels found with that name.';
         return;
     }
     const channelIds = data.items.map(item => item.snippet.channelId).join(',');
-    const statsUrl = `http://localhost:3000/api/youtube?endpoint=channels&part=snippet,statistics&id=${channelIds}`;
-    const statsRes = await fetch(statsUrl);
+    const statsUrl = `${API_BASE_URL}/api/youtube?url=${encodeURIComponent(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelIds}`)}`;
+    const statsRes = await fetch(statsUrl, {
+        headers: currentSessionToken ? { 'Authorization': `Bearer ${currentSessionToken}` } : {}
+    });
     const statsData = await statsRes.json();
     const sorted = statsData.items.sort((a, b) => parseInt(b.statistics.subscriberCount||0) - parseInt(a.statistics.subscriberCount||0));
     const channelInfoContainer = document.getElementById('channelInfo'); // Ensure this is the correct container
