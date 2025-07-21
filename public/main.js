@@ -427,7 +427,7 @@ function initializeGoogleSignIn() {
 
     try {
         google.accounts.id.initialize({
-            client_id: '198900085311-kmt88sgiaeojcn5g53bqam2hk789qfj2.apps.googleusercontent.com',
+            client_id: GOOGLE_CLIENT_ID,
             callback: handleCredentialResponse,
             ux_mode: 'popup', // Use popup mode to avoid OneTap and FedCM AbortError
             auto_select: false // Prevent auto sign-in
